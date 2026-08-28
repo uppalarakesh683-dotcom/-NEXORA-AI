@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://nexora-ai-4woh.onrender.com";
 
 let selectedAgent = "General AI";
 let isListening = false;
