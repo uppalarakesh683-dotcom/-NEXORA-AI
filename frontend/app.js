@@ -25,6 +25,13 @@ let agentMemory = JSON.parse(
 
 
 /* =========================================
+   TYPING DOTS ANIMATION
+========================================= */
+
+let typingDotsInterval = null;
+
+
+/* =========================================
    ELEMENTS
 ========================================= */
 
@@ -674,10 +681,12 @@ function addMessage(
 ========================================= */
 
 const AGENT_THINKING_PROFILES = {
+
     "General AI": {
         tagline: "OMNI CORE",
         status: "PROCESSING REQUEST",
         colorClass: "theme-omni",
+
         iconHtml: `
             <div class="holo-avatar omni-avatar">
                 <div class="holo-glow"></div>
@@ -688,125 +697,293 @@ const AGENT_THINKING_PROFILES = {
                 <div class="holo-spark s2"></div>
             </div>`
     },
+
+
     "Coding Agent": {
         tagline: "CODE FORGE",
         status: "COMPILING SYNTAX",
         colorClass: "theme-code",
+
         iconHtml: `
             <div class="holo-avatar code-avatar">
                 <div class="holo-glow"></div>
+
                 <div class="code-matrix-box">
                     <span class="code-glyph">&lt;/&gt;</span>
                 </div>
+
                 <div class="holo-ring ring-code"></div>
+
                 <div class="holo-spark s1"></div>
                 <div class="holo-spark s2"></div>
             </div>`
     },
+
+
     "Study Agent": {
         tagline: "KNOWLEDGE CORE",
         status: "SYNTHESIZING KNOWLEDGE",
         colorClass: "theme-study",
+
         iconHtml: `
             <div class="holo-avatar study-avatar">
                 <div class="holo-glow"></div>
+
                 <div class="neural-lattice">
                     <span class="neural-node nn-1"></span>
                     <span class="neural-node nn-2"></span>
                     <span class="neural-node nn-3"></span>
                 </div>
+
                 <div class="holo-core gold-core"></div>
+
                 <div class="holo-spark s1"></div>
                 <div class="holo-spark s2"></div>
             </div>`
     },
+
+
     "Research Agent": {
         tagline: "INTELLECT ENGINE",
         status: "DEEP SCANNING",
         colorClass: "theme-research",
+
         iconHtml: `
             <div class="holo-avatar research-avatar">
                 <div class="holo-glow"></div>
+
                 <div class="radar-scan-circle">
                     <div class="radar-sweep-beam"></div>
                     <div class="radar-cross"></div>
                 </div>
+
                 <div class="holo-core sapphire-core"></div>
+
                 <div class="holo-spark s1"></div>
             </div>`
     },
+
+
     "Creative Agent": {
         tagline: "CREATIVE MATRIX",
         status: "GENERATING IDEAS",
         colorClass: "theme-creative",
+
         iconHtml: `
             <div class="holo-avatar creative-avatar">
                 <div class="holo-glow"></div>
+
                 <div class="aurora-torus knot-1"></div>
                 <div class="aurora-torus knot-2"></div>
+
                 <div class="holo-core magenta-core"></div>
+
                 <div class="holo-spark s1"></div>
                 <div class="holo-spark s2"></div>
             </div>`
     },
+
+
     "Data Agent": {
         tagline: "DATA NEXUS",
         status: "ANALYZING DATA",
         colorClass: "theme-data",
+
         iconHtml: `
             <div class="holo-avatar data-avatar">
                 <div class="holo-glow"></div>
+
                 <div class="tesseract-cube">
                     <span class="tess-square t1"></span>
                     <span class="tess-square t2"></span>
                 </div>
+
                 <div class="holo-core cyan-core"></div>
+
                 <div class="holo-spark s1"></div>
             </div>`
     }
+
 };
 
+
+/* =========================================
+   SHOW TYPING
+   THREE DOT ANIMATION ADDED
+========================================= */
+
 function showTyping() {
+
     removeTyping();
 
-    const profile = AGENT_THINKING_PROFILES[selectedAgent] || AGENT_THINKING_PROFILES["General AI"];
 
-    const typing = document.createElement("div");
-    typing.id = "typingIndicator";
-    typing.className = `message ai thinking-indicator-container ${profile.colorClass}`;
+    const profile =
+        AGENT_THINKING_PROFILES[selectedAgent] ||
+        AGENT_THINKING_PROFILES["General AI"];
+
+
+    const typing =
+        document.createElement("div");
+
+
+    typing.id =
+        "typingIndicator";
+
+
+    typing.className =
+        `message ai thinking-indicator-container ${profile.colorClass}`;
+
 
     typing.innerHTML = `
+
         <div class="thinking-avatar-wrapper">
+
             ${profile.iconHtml}
+
         </div>
+
+
         <div class="message-bubble thinking-bubble">
+
             <div class="thinking-header">
-                <span class="thinking-agent-name">${escapeHTML(selectedAgent.toUpperCase())}</span>
-                <span class="thinking-separator">//</span>
-                <span class="thinking-status">${escapeHTML(profile.status)}</span>
+
+                <span class="thinking-agent-name">
+                    ${escapeHTML(
+                        selectedAgent.toUpperCase()
+                    )}
+                </span>
+
+                <span class="thinking-separator">
+                    //
+                </span>
+
+                <span class="thinking-status">
+                    ${escapeHTML(
+                        profile.status
+                    )}
+                </span>
+
             </div>
+
+
             <div class="thinking-telemetry">
+
                 <div class="thinking-waveform">
+
                     <span class="wave-bar wb-1"></span>
                     <span class="wave-bar wb-2"></span>
                     <span class="wave-bar wb-3"></span>
                     <span class="wave-bar wb-4"></span>
                     <span class="wave-bar wb-5"></span>
+
                 </div>
-                <span class="thinking-tagline">[ ${escapeHTML(profile.tagline)} ]</span>
+
+
+                <span class="thinking-tagline">
+
+                    [ ${escapeHTML(
+                        profile.tagline
+                    )} ]
+
+                </span>
+
+
+                <span
+                    id="thinkingDots"
+                    class="thinking-dots"
+                >
+                    .
+                </span>
+
             </div>
+
         </div>
+
     `;
 
-    messages.appendChild(typing);
-    messages.scrollTop = messages.scrollHeight;
+
+    messages.appendChild(
+        typing
+    );
+
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+
+    /* =====================================
+       START THREE DOT ANIMATION
+    ===================================== */
+
+    const dotsElement =
+        document.getElementById(
+            "thinkingDots"
+        );
+
+
+    let dotCount = 1;
+
+
+    typingDotsInterval =
+        setInterval(() => {
+
+            if (!dotsElement) {
+                return;
+            }
+
+
+            dotCount++;
+
+
+            if (dotCount > 3) {
+                dotCount = 1;
+            }
+
+
+            dotsElement.textContent =
+                ".".repeat(dotCount);
+
+
+            messages.scrollTop =
+                messages.scrollHeight;
+
+
+        }, 400);
+
 }
 
+
+/* =========================================
+   REMOVE TYPING
+========================================= */
+
 function removeTyping() {
-    const typing = document.getElementById("typingIndicator");
-    if (typing) {
-        typing.remove();
+
+    /* Stop dot animation */
+
+    if (typingDotsInterval) {
+
+        clearInterval(
+            typingDotsInterval
+        );
+
+        typingDotsInterval = null;
+
     }
+
+
+    const typing =
+        document.getElementById(
+            "typingIndicator"
+        );
+
+
+    if (typing) {
+
+        typing.remove();
+
+    }
+
 }
 
 
@@ -895,6 +1072,7 @@ function renderRecentChats() {
 
 
         item.innerHTML = `
+
             <strong>
                 ${escapeHTML(chat.agent)}
             </strong>
@@ -906,6 +1084,7 @@ function renderRecentChats() {
             <small>
                 ${escapeHTML(chat.time)}
             </small>
+
         `;
 
 
