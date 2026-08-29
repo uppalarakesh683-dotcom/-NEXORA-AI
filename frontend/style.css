@@ -1849,3 +1849,33 @@ textarea {
     }
 
 }
+/* =========================================
+   AI THINKING THREE DOTS
+========================================= */
+
+.thinking-dots {
+    display: inline-block;
+    min-width: 24px;
+    margin-left: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    animation: thinkingDotsGlow 0.8s ease-in-out infinite;
+}
+
+@keyframes thinkingDotsGlow {
+    0% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+}
